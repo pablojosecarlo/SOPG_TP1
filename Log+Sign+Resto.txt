@@ -1,0 +1,8 @@
+1.-DATA:Hola Mundo
+2.-DATA:Esto
+3.-CTRL+C
+4.-DATA:es una
+5.-SIGN:1
+6.-SIGN:2
+7.-DATA:prueba
+8.-SIGN:1
