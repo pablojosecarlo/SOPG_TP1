@@ -112,9 +112,15 @@ int main(void)
             
             i++;  //contador de comunicaciones
 
-            //fpALL guardo todo lo recibido crudo en Log+Sign+Resto.txt
-            fprintf(fpALL,"%d.-%s\n", i, inputBuffer);
-                
+            //detecto el 0 de que se cerró el writter
+            if (inputBuffer[0] == 0){
+                //writter cerrado
+                printf("Writter cerrado\n");
+            }else{
+
+                //fpALL guardo todo lo recibido crudo en Log+Sign+Resto.txt
+                fprintf(fpALL,"%d.-%s\n", i, inputBuffer);
+                    
                 //fpDATA identifico la DATA: y la guardo
                 ptr = strstr(inputBuffer, "DATA:");
                 if (ptr != NULL) 
@@ -135,16 +141,16 @@ int main(void)
                 {
                     fprintf(fpSIGN,"%d.-%s\n", i, inputBuffer);
                 }
-
+            }
 		}
 	}
-	while (bytesRead > 0 && i<nComunicaciones);
+	while (bytesRead > 0 );
 
     fclose(fpALL); 
     fclose(fpDATA); 
     fclose(fpSIGN); 
 
-    printf ("Saliendo, recibidas %d comunicaciones y señales\n", nComunicaciones );
+    printf ("Saliendo, recibidas %d comunicaciones y señales\n", i );
 
 	return 0;
 }

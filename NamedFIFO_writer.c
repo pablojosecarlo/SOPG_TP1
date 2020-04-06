@@ -57,16 +57,8 @@ int main(void)
 	uint32_t bytesWrote;
 	int32_t returnCode, fd;
 
-    //Cambio los handlers de SIGINT, SIGUSR1 y SIGUSR2
+    //Cambio los handlers de SIGUSR1 y SIGUSR2
     struct sigaction sa;
-    sa.sa_handler = sigint_handler;
-    sa.sa_flags = 0; //SA_RESTART;
-
-    sigemptyset(&sa.sa_mask);
-    if (sigaction(SIGINT, &sa, NULL) == -1) {
-        perror("sigaction");
-        exit(1);
-    }
 
     sa.sa_handler = sigusr1_handler;
     sa.sa_flags = 0; //SA_RESTART;
@@ -110,17 +102,6 @@ int main(void)
 	{
         //Verifico que llegaron las señales y las envío
         switch (sigNumber){
-            case SIGINT:
-                /* Write buffer to named fifo. */
-                if ((bytesWrote = write(fd, "CTRL+C", strlen("CTRL+C"))) == -1)
-                {
-                    perror("write CTRL+C");
-                }
-                else
-                {
-                    printf("writer: wrote CTRL+C %d bytes\n", bytesWrote);
-                } 
-            break;
             case SIGUSR1:
                 /* Write buffer to named fifo. */
                 if ((bytesWrote = write(fd, "SIGN:1", strlen("SIGN:1"))) == -1)
@@ -151,12 +132,14 @@ int main(void)
         //Verifico que llegaron Textos señales y los envío:
         /* Get some text from console */
 		fgets(outputBuffer, BUFFER_SIZE, stdin);
-        //Agrego DATA:
-        char auxBuffer[BUFFER_SIZE + strlen("DATA:")];
-        strcpy (auxBuffer,"DATA:");
-        strcat (auxBuffer, outputBuffer);
 
-        if(strlen(outputBuffer) != 0){  //evito que se vuelva a escribir el buffer cuando se recive un SIGN
+        //reviso lo que me devuelve fgets
+        if(outputBuffer[0] != 0){  //No me interrumpió una SIGNAL
+            //Agrego DATA:
+            char auxBuffer[BUFFER_SIZE + strlen("DATA:")];
+            strcpy (auxBuffer,"DATA:");
+            strcat (auxBuffer, outputBuffer);
+
             /* Write buffer to named fifo. Strlen - 1 to avoid sending \n char */
             if ((bytesWrote = write(fd, auxBuffer, strlen(auxBuffer)-1)) == -1)
             {
@@ -165,11 +148,9 @@ int main(void)
             else
             {
                 printf("writer: wrote DATA:etc. %d bytes\n", bytesWrote);
-                outputBuffer[0] = 0;  //aseguro que el llamado a strlen(outputBuffer) sea 0
-                //memset(outputBuffer, 0, BUFFER_SIZE);
             }       
-        }
 
+        }
 	}//cierre del while
     
 	return 0;
